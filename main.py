@@ -33,6 +33,57 @@ async def calculate_two_values(num1: int, num2: int, operation: str):
             return "Error: Invalid operation"
 
 
+@server.get("/temperature")
+async def convert_temperature_endpoint(
+    from_unit: str = Query(
+        description="Unit to convert from", regex="Celsius|Fahrenheit|Kelvin"
+    ),
+    to_unit: str = Query(
+        description="Unit to convert to", regex="Celsius|Fahrenheit|Kelvin"
+    ),
+    value: float = Query(description="Value to convert"),
+):
+    """
+    Async function to convert temperature from one unit to another.
+
+    Args:
+        from_unit (str): Unit to convert from, should be 'Celsius', 'Fahrenheit', or 'Kelvin'.
+        to_unit (str): Unit to convert to, should be 'Celsius', 'Fahrenheit', or 'Kelvin'.
+        value (float): Value to convert.
+
+    Returns:
+        dict: Dictionary containing the converted value.
+    """
+
+    def convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
+        conversion = (from_unit, to_unit)
+
+        match conversion:
+            case ("Celsius", "Fahrenheit"):
+                return (value * 9 / 5) + 32
+            
+            case ("Celsius", "Kelvin"):
+                return value + 273.15
+            
+            case ("Fahrenheit", "Celsius"):
+                return (value - 32) * 5 / 9
+            
+            case ("Fahrenheit", "Kelvin"):
+                return (value - 32) * 5 / 9 + 273.15
+            
+            case ("Kelvin", "Celsius"):
+                return value - 273.15
+            
+            case ("Kelvin", "Fahrenheit"):
+                return (value - 273.15) * 9 / 5 + 32
+            case _:
+                return value 
+            
+
+    converted_value = convert_temperature(value, from_unit, to_unit)
+    return {"converted_value": converted_value}
+
+
 @server.post("/factorial")
 async def calculate_factorial_route(num: int = Query(example=5)):
     """
